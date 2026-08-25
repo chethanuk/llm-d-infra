@@ -195,7 +195,7 @@ on:
         description: 'Timeout in seconds to wait for benchmark pods to complete'
         required: false
         type: 'string'
-        default: '1200'
+        default: '2400'
       pvc_bind_timeout:
         description: 'Timeout in seconds to wait for a pvc to be bound'
         required: false

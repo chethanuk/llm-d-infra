@@ -101,36 +101,38 @@ on:
         required: false
         type: 'string'
         default: 'true'
-      gateway_api_version:
-        description: 'Gateway API version ("latest")'
-        required: false
-        type: 'string'
-        default: 'latest'
-      gaie_version:
-        description: 'Gateway API Inference Extension ("latest")'
-        required: false
-        type: 'string'
-        default: 'latest'
-      router_release_version:
-        description: 'Router release version ("latest")'
-        required: false
-        type: 'string'
-        default: 'latest'
-      router_standalone_chart_url:
-        description: 'standalone router chart URL ("oci://ghcr.io/llm-d/charts/llm-d-router-standalone")'
-        required: false
-        type: 'string'
-        default: 'oci://ghcr.io/llm-d/charts/llm-d-router-standalone'
-      router_gateway_chart_url:
-        description: 'gateway router chart URL ("oci://ghcr.io/llm-d/charts/llm-d-router-gateway")'
-        required: false
-        type: 'string'
-        default: 'oci://ghcr.io/llm-d/charts/llm-d-router-gateway'
-      router_chart_version:
-        description: 'llm-d-router version ("v0" for latest, "v0.x.0" for a released chart)'
-        required: false
-        type: 'string'
-        default: 'v0'
+      # TODO(revisit): versions now come from llm-d "guides/env.sh" (sourced in the kustomize overrides step);
+      # the inputs below are unused by all known callers and are commented out until this is revisited.
+      # gateway_api_version:
+        # description: 'Gateway API version ("latest")'
+        # required: false
+        # type: 'string'
+        # default: 'latest'
+      # gaie_version:
+        # description: 'Gateway API Inference Extension ("latest")'
+        # required: false
+        # type: 'string'
+        # default: 'latest'
+      # router_release_version:
+        # description: 'Router release version ("latest")'
+        # required: false
+        # type: 'string'
+        # default: 'latest'
+      # router_standalone_chart_url:
+        # description: 'standalone router chart URL ("oci://ghcr.io/llm-d/charts/llm-d-router-standalone")'
+        # required: false
+        # type: 'string'
+        # default: 'oci://ghcr.io/llm-d/charts/llm-d-router-standalone'
+      # router_gateway_chart_url:
+        # description: 'gateway router chart URL ("oci://ghcr.io/llm-d/charts/llm-d-router-gateway")'
+        # required: false
+        # type: 'string'
+        # default: 'oci://ghcr.io/llm-d/charts/llm-d-router-gateway'
+      # router_chart_version:
+        # description: 'llm-d-router version ("v0" for latest, "v0.x.0" for a released chart)'
+        # required: false
+        # type: 'string'
+        # default: 'v0'
       dry_run:
         description: 'Execute workflow in "dry-run" mode ("true", "false")'
         required: false
@@ -404,12 +406,13 @@ jobs:
       LLMDBENCH_WORKSPACE: ${{ inputs.workspace_dir || '/tmp/llmdbenchcicd' }}
       LLMDBENCH_HF_TOKEN: ${{ secrets.LLMDBENCH_HF_TOKEN }}
       HF_TOKEN: ${{ secrets.LLMDBENCH_HF_TOKEN }}
-      LLMDBENCH_CICD_GATEWAY_API_VERSION: ${{ inputs.gateway_api_version || 'latest' }}
-      LLMDBENCH_CICD_GAIE_VERSION: ${{ inputs.gaie_version || 'latest' }}
-      LLMDBENCH_CICD_ROUTER_RELEASE_VERSION: ${{ inputs.router_release_version || 'latest' }}
-      LLMDBENCH_CICD_ROUTER_CHART_VERSION: ${{ inputs.router_chart_version || 'v0' }}
-      LLMDBENCH_CICD_ROUTER_STANDALONE_CHART_URL: ${{ inputs.router_standalone_chart_url || 'oci://ghcr.io/llm-d/charts/llm-d-router-standalone' }}
-      LLMDBENCH_CICD_ROUTER_GATEWAY_CHART_URL: ${{ inputs.router_gateway_chart_url || 'oci://ghcr.io/llm-d/charts/llm-d-router-gateway' }}
+      # TODO(revisit): version env vars commented out for now; values come from llm-d "guides/env.sh".
+      # LLMDBENCH_CICD_GATEWAY_API_VERSION: ${{ inputs.gateway_api_version || 'latest' }}
+      # LLMDBENCH_CICD_GAIE_VERSION: ${{ inputs.gaie_version || 'latest' }}
+      # LLMDBENCH_CICD_ROUTER_RELEASE_VERSION: ${{ inputs.router_release_version || 'latest' }}
+      # LLMDBENCH_CICD_ROUTER_CHART_VERSION: ${{ inputs.router_chart_version || 'v0' }}
+      # LLMDBENCH_CICD_ROUTER_STANDALONE_CHART_URL: ${{ inputs.router_standalone_chart_url || 'oci://ghcr.io/llm-d/charts/llm-d-router-standalone' }}
+      # LLMDBENCH_CICD_ROUTER_GATEWAY_CHART_URL: ${{ inputs.router_gateway_chart_url || 'oci://ghcr.io/llm-d/charts/llm-d-router-gateway' }}
       LLMDBENCH_CICD_GATEWAY_CLASS: ${{ inputs.gateway_class || 'istio' }}
       LLMDBENCH_IS_DRY_RUN: ${{ inputs.dry_run || 'false' }}
       LLMDBENCH_IS_VERBOSE: ${{ inputs.verbose || 'false' }}
@@ -865,78 +868,39 @@ jobs:
           export LLMDBENCH_CICD_SCENARIO_FILE="$LLMDBENCH_CICD_BENCHMARK_PATH/config/scenarios/$LLMDBENCH_CICD_SCENARIO_DIR/${LLMDBENCH_CICD_SCENARIO//\//-}.yaml"
           LLMDBENCH_CICD_EFFECTIVE_GUIDE_NAME="${LLMDBENCH_CICD_SCENARIO%/}"
           export LLMDBENCH_CICD_EFFECTIVE_GUIDE_NAME
-          if [[ $LLMDBENCH_CICD_GATEWAY_API_VERSION == "latest" ]]; then
-            export LLMDBENCH_CICD_GATEWAY_API_URL=releases/latest/download
-          else
-            export LLMDBENCH_CICD_GATEWAY_API_URL=releases/download/${LLMDBENCH_CICD_GATEWAY_API_VERSION}
+          # Versions, release URLs and chart coordinates come from the shared "guides/env.sh" of the
+          # llm-d checkout.
+          export REPO_ROOT="$LLMDBENCH_CICD_REPO_PATH"
+          # TODO(revisit): version inputs are commented out for now; env.sh defaults (main) or pins (release branches) apply.
+          # export GATEWAY_API_VERSION="$LLMDBENCH_CICD_GATEWAY_API_VERSION"
+          # export GAIE_VERSION="$LLMDBENCH_CICD_GAIE_VERSION"
+          # export ROUTER_RELEASE_VERSION="$LLMDBENCH_CICD_ROUTER_RELEASE_VERSION"
+          # export ROUTER_CHART_VERSION="$LLMDBENCH_CICD_ROUTER_CHART_VERSION"
+          # export ROUTER_STANDALONE_CHART="$LLMDBENCH_CICD_ROUTER_STANDALONE_CHART_URL"
+          # export ROUTER_GATEWAY_CHART="$LLMDBENCH_CICD_ROUTER_GATEWAY_CHART_URL"
+          LLMDBENCH_CICD_GUIDES_ENV_FILE="$LLMDBENCH_CICD_REPO_PATH/guides/env.sh"
+          if [[ ! -f $LLMDBENCH_CICD_GUIDES_ENV_FILE ]]; then
+            echo "### ERROR: \"$LLMDBENCH_CICD_GUIDES_ENV_FILE\" not found"
+            exit 1
           fi
-          if [[ $LLMDBENCH_CICD_GAIE_VERSION == "latest" ]]; then
-            export LLMDBENCH_CICD_GAIE_URL=releases/latest/download
-          else
-            export LLMDBENCH_CICD_GAIE_URL=releases/download/${LLMDBENCH_CICD_GAIE_VERSION}
-          fi
-          if [[ $LLMDBENCH_CICD_ROUTER_RELEASE_VERSION == "latest" ]]; then
-            export LLMDBENCH_CICD_ROUTER_RELEASE_URL=releases/latest/download
-          else
-            export LLMDBENCH_CICD_ROUTER_RELEASE_URL=releases/download/${LLMDBENCH_CICD_ROUTER_RELEASE_VERSION}
-          fi
+          echo "### Sourcing \"$LLMDBENCH_CICD_GUIDES_ENV_FILE\""
+          # shellcheck source=/dev/null
+          source "$LLMDBENCH_CICD_GUIDES_ENV_FILE"
+          mapfile -t LLMDBENCH_CICD_GUIDES_ENV_VARS < <(sed -nE 's/^[[:space:]]*export[[:space:]]+([A-Za-z_][A-Za-z0-9_]*)=.*/\1/p' "$LLMDBENCH_CICD_GUIDES_ENV_FILE" | awk '!seen[$0]++')
           echo "### Setting \"INFRA_PROVIDER\" to \"$LLMDBENCH_CICD_INFRA_PROVIDER\" in \"$LLMDBENCH_CICD_SCENARIO_FILE\""
           lkcmd="yq -i \".scenario[0].kustomize.guideVariableOverrides.INFRA_PROVIDER = \\\"$LLMDBENCH_CICD_INFRA_PROVIDER\\\"\" $LLMDBENCH_CICD_SCENARIO_FILE"
           echo -n "$lkcmd" > "$LLMDBENCH_CICD_CMD_LOG"
           eval "$lkcmd"
           #
-          echo "### Setting \"REPO_ROOT\" to \"$LLMDBENCH_CICD_REPO_PATH\" in \"$LLMDBENCH_CICD_SCENARIO_FILE\""
-          lkcmd="yq -i \".scenario[0].kustomize.guideVariableOverrides.REPO_ROOT = \\\"$LLMDBENCH_CICD_REPO_PATH\\\"\" $LLMDBENCH_CICD_SCENARIO_FILE"
-          echo -n "; $lkcmd" >> "$LLMDBENCH_CICD_CMD_LOG"
-          eval "$lkcmd"
+          for var in "${LLMDBENCH_CICD_GUIDES_ENV_VARS[@]}"; do
+            echo "### Setting \"$var\" to \"${!var}\" (from guides/env.sh) in \"$LLMDBENCH_CICD_SCENARIO_FILE\""
+            lkcmd="yq -i \".scenario[0].kustomize.guideVariableOverrides.$var = \\\"${!var}\\\"\" $LLMDBENCH_CICD_SCENARIO_FILE"
+            echo -n "; $lkcmd" >> "$LLMDBENCH_CICD_CMD_LOG"
+            eval "$lkcmd"
+          done
           #
           echo "### Setting \"GUIDE_NAME\" to \"${LLMDBENCH_CICD_EFFECTIVE_GUIDE_NAME##*/}\" in \"$LLMDBENCH_CICD_SCENARIO_FILE\""
           lkcmd="yq -i \".scenario[0].kustomize.guideVariableOverrides.GUIDE_NAME = \\\"${LLMDBENCH_CICD_EFFECTIVE_GUIDE_NAME##*/}\\\"\" $LLMDBENCH_CICD_SCENARIO_FILE"
-          echo -n "; $lkcmd" >> "$LLMDBENCH_CICD_CMD_LOG"
-          eval "$lkcmd"
-          #
-          echo "### Setting \"GATEWAY_API_VERSION\" to \"$LLMDBENCH_CICD_GATEWAY_API_VERSION\" in \"$LLMDBENCH_CICD_SCENARIO_FILE\""
-          lkcmd="yq -i \".scenario[0].kustomize.guideVariableOverrides.GATEWAY_API_VERSION = \\\"$LLMDBENCH_CICD_GATEWAY_API_VERSION\\\"\" $LLMDBENCH_CICD_SCENARIO_FILE"
-          echo -n "; $lkcmd" >> "$LLMDBENCH_CICD_CMD_LOG"
-          eval "$lkcmd"
-          #
-          echo "### Setting \"GATEWAY_API_URL\" to \"$LLMDBENCH_CICD_GATEWAY_API_URL\" in \"$LLMDBENCH_CICD_SCENARIO_FILE\""
-          lkcmd="yq -i \".scenario[0].kustomize.guideVariableOverrides.GATEWAY_API_URL = \\\"$LLMDBENCH_CICD_GATEWAY_API_URL\\\"\" $LLMDBENCH_CICD_SCENARIO_FILE"
-          echo -n "; $lkcmd" >> "$LLMDBENCH_CICD_CMD_LOG"
-          eval "$lkcmd"
-          #
-          echo "### Setting \"GAIE_VERSION\" to \"$LLMDBENCH_CICD_GAIE_VERSION\" in \"$LLMDBENCH_CICD_SCENARIO_FILE\""
-          lkcmd="yq -i \".scenario[0].kustomize.guideVariableOverrides.GAIE_VERSION = \\\"$LLMDBENCH_CICD_GAIE_VERSION\\\"\" $LLMDBENCH_CICD_SCENARIO_FILE"
-          echo -n "; $lkcmd" >> "$LLMDBENCH_CICD_CMD_LOG"
-          eval "$lkcmd"
-          #
-          echo "### Setting \"GAIE_URL\" to \"$LLMDBENCH_CICD_GAIE_URL\" in \"$LLMDBENCH_CICD_SCENARIO_FILE\""
-          lkcmd="yq -i \".scenario[0].kustomize.guideVariableOverrides.GAIE_URL = \\\"$LLMDBENCH_CICD_GAIE_URL\\\"\" $LLMDBENCH_CICD_SCENARIO_FILE"
-          echo -n "; $lkcmd" >> "$LLMDBENCH_CICD_CMD_LOG"
-          eval "$lkcmd"
-          #
-          echo "### Setting \"LLMDBENCH_CICD_ROUTER_RELEASE_VERSION\" to \"$LLMDBENCH_CICD_ROUTER_RELEASE_VERSION\" in \"$LLMDBENCH_CICD_SCENARIO_FILE\""
-          lkcmd="yq -i \".scenario[0].kustomize.guideVariableOverrides.ROUTER_RELEASE_VERSION = \\\"$LLMDBENCH_CICD_ROUTER_RELEASE_VERSION\\\"\" $LLMDBENCH_CICD_SCENARIO_FILE"
-          echo -n "; $lkcmd" >> "$LLMDBENCH_CICD_CMD_LOG"
-          eval "$lkcmd"
-          #
-          echo "### Setting \"ROUTER_RELEASE_URL\" to \"$LLMDBENCH_CICD_ROUTER_RELEASE_URL\" in \"$LLMDBENCH_CICD_SCENARIO_FILE\""
-          lkcmd="yq -i \".scenario[0].kustomize.guideVariableOverrides.ROUTER_RELEASE_URL = \\\"$LLMDBENCH_CICD_ROUTER_RELEASE_URL\\\"\" $LLMDBENCH_CICD_SCENARIO_FILE"
-          echo -n "; $lkcmd" >> "$LLMDBENCH_CICD_CMD_LOG"
-          eval "$lkcmd"
-          #
-          echo "### Setting \"ROUTER_STANDALONE_CHART\" to \"$LLMDBENCH_CICD_ROUTER_STANDALONE_CHART_URL\" in \"$LLMDBENCH_CICD_SCENARIO_FILE\""
-          lkcmd="yq -i \".scenario[0].kustomize.guideVariableOverrides.ROUTER_STANDALONE_CHART = \\\"$LLMDBENCH_CICD_ROUTER_STANDALONE_CHART_URL\\\"\" $LLMDBENCH_CICD_SCENARIO_FILE"
-          echo -n "; $lkcmd" >> "$LLMDBENCH_CICD_CMD_LOG"
-          eval "$lkcmd"
-          #
-          echo "### Setting \"ROUTER_GATEWAY_CHART\" to \"$LLMDBENCH_CICD_ROUTER_GATEWAY_CHART_URL\" in \"$LLMDBENCH_CICD_SCENARIO_FILE\""
-          lkcmd="yq -i \".scenario[0].kustomize.guideVariableOverrides.ROUTER_GATEWAY_CHART = \\\"$LLMDBENCH_CICD_ROUTER_GATEWAY_CHART_URL\\\"\" $LLMDBENCH_CICD_SCENARIO_FILE"
-          echo -n "; $lkcmd" >> "$LLMDBENCH_CICD_CMD_LOG"
-          eval "$lkcmd"
-          #
-          echo "### Setting \"ROUTER_CHART_VERSION\" to \"$LLMDBENCH_CICD_ROUTER_CHART_VERSION\" in \"$LLMDBENCH_CICD_SCENARIO_FILE\""
-          lkcmd="yq -i \".scenario[0].kustomize.guideVariableOverrides.ROUTER_CHART_VERSION = \\\"$LLMDBENCH_CICD_ROUTER_CHART_VERSION\\\"\" $LLMDBENCH_CICD_SCENARIO_FILE"
           echo -n "; $lkcmd" >> "$LLMDBENCH_CICD_CMD_LOG"
           eval "$lkcmd"
           #
